@@ -1,0 +1,16 @@
+test (1).ipynb
+testing.py
+main1.py
+decision_tree_model.pkl
+deep_learning_model.pkl
+feature.py
+KNN_model.pkl
+Log_ROC.png
+Logistic_regression_model.pkl
+naive_bayes_model.pkl
+scaler.pkl
+standard_scalar_decision.pkl
+svc_model.pkl
+.~lock.userdetails.csv#
+.~lock.HealthData.csv#
+venv/
