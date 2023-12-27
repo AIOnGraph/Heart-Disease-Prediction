@@ -5,6 +5,7 @@ import pandas as pd
 
 
 
+
 models = {
     "Decision Tree": {
         "model": joblib.load("decision_tree_model.joblib"),
@@ -40,12 +41,16 @@ st.set_page_config(
     page_icon=":heart:",
 )
 
-# Apply a black background color and set text color to white
-primaryColor="#F63366"
-backgroundColor="#FFFFFF"
-secondaryBackgroundColor="#F0F2F6"
-textColor="#262730"
-font="sans serif"
+page_bg_img = '''
+<style>
+body {
+background-image: url("https://images.unsplash.com/photo-1542281286-9e0a16bb7366");
+background-size: cover;
+}
+</style>
+'''
+
+st.markdown(page_bg_img, unsafe_allow_html=True)
 
 st.title('**Heart Disease Prediction**')
 st.subheader('Please, fill your informations to predict your heart condition')
@@ -137,7 +142,7 @@ dataToPredic = pd.DataFrame({
  })
 
 
-   
+
 
 if button :
     positive_predictions = 0  
@@ -150,19 +155,21 @@ if button :
         if prediction == 1:
             positive_predictions += 1
 
-    
         threshold = 3
         if positive_predictions >= threshold:
             final_prediction = 1  
-    else:
-        final_prediction = 0  
+    
+    else: 
+        final_prediction = 0
+        
         
         with st.container(): 
           
             st.write(f"Heart disease: {'**Yes, you have a heart problem.**' if prediction == 1 else '**No, you do not have a heart problem.**'}")
 
+        feedback = st.text_area("Please provide your feedback:", "")
+        button = st.button('**Submit your valuable feedback**')
     st.markdown("**Disclaimer:** This tool is for informational purposes only. Please consult a healthcare professional for accurate diagnosis and treatment.")
-
 
 
 

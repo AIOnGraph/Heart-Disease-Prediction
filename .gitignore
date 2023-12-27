@@ -14,3 +14,10 @@ svc_model.pkl
 .~lock.userdetails.csv#
 .~lock.HealthData.csv#
 venv/
+.env
+panel.py
+feature.py
+Heart-disease-know-your-risk.png
+Heart_image.png
+feedback.db
+__pycache__/
