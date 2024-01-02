@@ -193,8 +193,6 @@ if button:
         if not openai_key:
             st.warning("Please enter the OpenAI key in the sidebar to see the prediction result.")
         else:
-            # Use secrets to securely store and access the OpenAI key
-            # secrets["openai_key"] = openai_key
 
             collected_message = get_diagnosis_explanation(name, dataToPredic,openai_key)
 
