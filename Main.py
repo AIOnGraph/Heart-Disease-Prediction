@@ -157,6 +157,12 @@ dataToPredic = pd.DataFrame({
 "thal": [thal],
  })
 
+with st.sidebar:
+    st.title('OpenAI Key Input')
+    openai_key = st.text_input('Enter your OpenAI key:', type="password")
+    st.write(f'You entered: {len(openai_key) * "*"}')
+
+
 if button:
     positive_predictions = 0  
     predicted_models = []
@@ -165,26 +171,34 @@ if button:
         user_data_scaled = model_dict["scaler"].transform(dataToPredic)
         prediction = model_dict["model"].predict(user_data_scaled)[0]
 
-
-    
         if prediction == 1:
             positive_predictions += 1
             predicted_models.append(model_name)
 
     threshold = 3
 
-
     if positive_predictions >= threshold:
         final_prediction = 1
+        if not openai_key:
+            st.warning("Please enter the OpenAI key in the sidebar to proceed with the prediction.")
+        else:
+            collected_message = get_diagnosis_explanation(name, dataToPredic,openai_key)
 
-        collected_message = get_diagnosis_explanation(name, dataToPredic)
-
-        st.write(f"Heart disease: {'**Yes, you have a heart problem.**'}")
-        st.write("Explanation of possible diseases due to the provided features:")
-        empty_placeholder = st.empty()
-        empty_placeholder.write(collected_message)
-
+            st.write(f"Heart disease: {'Yes, you have a heart problem.'}")
+            st.write("Explanation of possible diseases due to the provided features:")
+            empty_placeholder = st.empty()
+            empty_placeholder.write(collected_message)
     else:
         final_prediction = 0
-        st.write(f"Heart disease: {'**No, you do not have a heart problem.**'}")
+        if not openai_key:
+            st.warning("Please enter the OpenAI key in the sidebar to see the prediction result.")
+        else:
+            # Use secrets to securely store and access the OpenAI key
+            # secrets["openai_key"] = openai_key
 
+            collected_message = get_diagnosis_explanation(name, dataToPredic,openai_key)
+
+            st.write(f"Heart disease: {'No, you do not have a heart problem.*'}")
+            st.write("Explanation of possible health conditions:")
+            empty_placeholder = st.empty()
+            empty_placeholder.write(collected_message)
