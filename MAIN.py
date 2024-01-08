@@ -4,56 +4,45 @@ import pandas as pd
 from dotenv import load_dotenv
 load_dotenv()
 import base64
-from gpt_interaction import get_diagnosis_explanation
-
-models = {
+from gpt import get_diagnosis_explanation
+from langchain.chat_models import ChatOpenAI
+from langchain.callbacks import StreamlitCallbackHandler
+import time
+@st.cache_data
+def load_models():
+    models = {
     "Decision Tree": {
-        "model": joblib.load("decision_tree_model.joblib"),
-        "scaler": joblib.load('scaler.joblib'),
+        "model": joblib.load("decision_tree_model.pkl"),
+        "scaler": joblib.load('scaler.pkl'),
     },
     "Logistic Regression": {
-        "model": joblib.load("Logistic_regression_model.joblib"),
-        "scaler": joblib.load('scaler.joblib'),
+        "model": joblib.load("Logistic_regression_model.pkl"),
+        "scaler": joblib.load('scaler.pkl'),
     },
     "KNN": {
-        "model": joblib.load("KNN_model.joblib"),
-        "scaler": joblib.load('scaler.joblib'),
+        "model": joblib.load("KNN_model.pkl"),
+        "scaler": joblib.load('scaler.pkl'),
     },
     "Naive Bayes": {
-        "model": joblib.load("naive_bayes_model.joblib"),
-        "scaler": joblib.load('scaler.joblib'),
+        "model": joblib.load("naive_bayes_model.pkl"),
+        "scaler": joblib.load('scaler.pkl'),
     },
     "SVM": {
-        "model": joblib.load("svc_model.joblib"),
-        "scaler": joblib.load('scaler.joblib'),
+        "model": joblib.load("svc_model.pkl"),
+        "scaler": joblib.load('scaler.pkl'),
     },
     "Deep Learning": {
-       
-        "model": joblib.load("deep_learning_model.joblib"),
-        "scaler": joblib.load('scaler.joblib'),
+        "model": joblib.load("deep_learning_model.pkl"),
+        "scaler": joblib.load('scaler.pkl'),
     },
 }
-
+    return models
 
 st.set_page_config(
     layout="wide",
     page_title="Heart Disease Prediction",
     page_icon=":heart:",
 )
-st.markdown(
-    """
-    <style>
-    /* Targeting the title by its class name */
-    .css-1luzgkg {
-        /* Increase the font size of the title */
-        font-size: 50px; /* Change the font size to your preferred value */
-    }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
-
-
 with st.container():
     side_bg_ext = 'png'
     side_bg = 'heartimage.png'
@@ -62,7 +51,7 @@ with st.container():
 <style>
 [data-testid="stAppViewContainer"] > .main {{
 background-image: url(data:image/{side_bg_ext};base64,{base64.b64encode(open(side_bg, "rb").read()).decode()});
-background-size: 180%;
+background-size: 200%;
 background-position: top left;
 background-repeat: no-repeat;
 background-attachment: local;
@@ -71,8 +60,42 @@ background-attachment: local;
     """,
     unsafe_allow_html=True,
     )
-st.title('**Heart Disease Prediction**')
-st.subheader('Please, fill your informations to predict your heart condition')
+
+models = load_models()
+
+@st.cache_data
+def get_prediction(dataToPredic):
+    positive_predictions = 0
+    predicted_models = []
+
+    for model_name, model_dict in models.items():
+        user_data_scaled = model_dict["scaler"].transform(dataToPredic)
+        prediction = model_dict["model"].predict(user_data_scaled)[0]
+
+        if prediction == 1:
+            positive_predictions += 1
+            predicted_models.append(model_name)
+
+    threshold = 3
+
+    if positive_predictions >= threshold:
+        final_prediction = 1
+    else:
+        final_prediction = 0
+
+    return final_prediction, predicted_models
+
+
+
+st.markdown("<h1 style='text-align: center; color: black;'>Heart Disease Prediction</h1>", unsafe_allow_html=True)
+
+st.write(
+    "Welcome to the Heart Disease Prediction App! 🌟\n"
+    "Let's embark on a journey to explore your heart health. Fill in the details below and let the magic happen!"
+)
+
+
+st.subheader('Tell us more about yourself:')
 col1,col2 = st.columns(2)
 with col1:
     name=st.text_input('**Name**')
@@ -139,7 +162,7 @@ with  col2:
         thal=6
     else:
         thal=7
-button = st.button('**Predict**')
+
    
 dataToPredic = pd.DataFrame({
 "age": [age],
@@ -157,46 +180,36 @@ dataToPredic = pd.DataFrame({
 "thal": [thal],
  })
 
-with st.sidebar:
-    st.title('OpenAI Key Input')
-    openai_key = st.text_input('Enter your OpenAI key:', type="password")
-    st.write(f'You entered: {len(openai_key) * "*"}')
+openai_key = None
+predict_button = st.button('Predict My Heart Health', key="predict_button")
 
+if predict_button:
+    with st.spinner('Analyzing...'):
+        final_prediction, predicted_models = get_prediction(dataToPredic)
+        time.sleep(3)
 
-if button:
-    positive_predictions = 0  
-    predicted_models = []
+    st.success('Analysis Complete!')
 
-    for model_name, model_dict in models.items():
-        user_data_scaled = model_dict["scaler"].transform(dataToPredic)
-        prediction = model_dict["model"].predict(user_data_scaled)[0]
-
-        if prediction == 1:
-            positive_predictions += 1
-            predicted_models.append(model_name)
-
-    threshold = 3
-
-    if positive_predictions >= threshold:
-        final_prediction = 1
-        if not openai_key:
-            st.warning("Please enter the OpenAI key in the sidebar to proceed with the prediction.")
-        else:
-            collected_message = get_diagnosis_explanation(name, dataToPredic,openai_key)
-
-            st.write(f"Heart disease: {'Yes, you have a heart problem.'}")
-            st.write("Explanation of possible diseases due to the provided features:")
-            empty_placeholder = st.empty()
-            empty_placeholder.write(collected_message)
+    if final_prediction == 1:
+        st.warning('Warning: It seems there might be an issue with your heart health. Consult with a healthcare professional.')
     else:
-        final_prediction = 0
-        if not openai_key:
-            st.warning("Please enter the OpenAI key in the sidebar to see the prediction result.")
-        else:
+        st.success('Great news! Your heart health appears to be in good condition.')
 
-            collected_message = get_diagnosis_explanation(name, dataToPredic,openai_key)
+more_info_checked = st.checkbox("Do you want more information regarding this disease", value=False)
 
-            st.write(f"Heart disease: {'No, you do not have a heart problem.*'}")
-            st.write("Explanation of possible health conditions:")
-            empty_placeholder = st.empty()
-            empty_placeholder.write(collected_message)
+if more_info_checked:
+    openai_key = st.text_input('Enter your OpenAI key:', type="password", key="openai_key_input")
+
+    if openai_key:
+        
+        chat = ChatOpenAI(streaming=True,
+                      callbacks=[StreamlitCallbackHandler(st.empty())],
+                        verbose=True, 
+                        temperature=0,
+                        api_key=openai_key
+                        )
+        
+        button = st.button('Submit',on_click=get_diagnosis_explanation,args=[name, dataToPredic, openai_key,chat])
+        if button:
+            st.success('Done!')
+            
