@@ -12,28 +12,28 @@ import time
 def load_models():
     models = {
     "Decision Tree": {
-        "model": joblib.load("decision_tree_model.pkl"),
-        "scaler": joblib.load('scaler.pkl'),
+        "model": joblib.load("decision_tree_model.joblib"),
+        "scaler": joblib.load('scaler.joblib'),
     },
     "Logistic Regression": {
-        "model": joblib.load("Logistic_regression_model.pkl"),
-        "scaler": joblib.load('scaler.pkl'),
+        "model": joblib.load("Logistic_regression_model.joblib"),
+        "scaler": joblib.load('scaler.joblib'),
     },
     "KNN": {
-        "model": joblib.load("KNN_model.pkl"),
-        "scaler": joblib.load('scaler.pkl'),
+        "model": joblib.load("KNN_model.joblib"),
+        "scaler": joblib.load('scaler.joblib'),
     },
     "Naive Bayes": {
-        "model": joblib.load("naive_bayes_model.pkl"),
-        "scaler": joblib.load('scaler.pkl'),
+        "model": joblib.load("naive_bayes_model.joblib"),
+        "scaler": joblib.load('scaler.joblib'),
     },
     "SVM": {
-        "model": joblib.load("svc_model.pkl"),
-        "scaler": joblib.load('scaler.pkl'),
+        "model": joblib.load("svc_model.joblib"),
+        "scaler": joblib.load('scaler.joblib'),
     },
     "Deep Learning": {
-        "model": joblib.load("deep_learning_model.pkl"),
-        "scaler": joblib.load('scaler.pkl'),
+        "model": joblib.load("deep_learning_model.joblib"),
+        "scaler": joblib.load('scaler.joblib'),
     },
 }
     return models
